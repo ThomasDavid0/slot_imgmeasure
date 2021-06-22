@@ -3,7 +3,7 @@ import cv2 as cv
 from geometry import Point, Points, Line
 import pandas as pd
 
-def receive_click_locations(imgpath):
+def receive_click_locations(imgpath, lbl):
 
     image = cv.imread(imgpath)
     
@@ -33,6 +33,8 @@ def receive_click_locations(imgpath):
             for loc in locs:
                 cv.drawMarker(image, loc, (0, 0, 255), markerType=cv.MARKER_STAR,markerSize=2, thickness=1, line_type=cv.LINE_AA)
 
+    cv.imwrite("output/" + imgpath.replace(".jpg", "_{}.jpg".format(lbl)), image)
+
     cv.destroyAllWindows()
     
     return np.column_stack([np.array(locs), np.zeros(len(locs))])
@@ -41,23 +43,23 @@ def receive_click_locations(imgpath):
 if __name__ == '__main__':
     scale = "normal_1/S20210601_0016.jpg"
     imgs = ["normal_1/S20210601_0001.jpg",
-           # "normal_1/S20210601_0002.jpg",
-           # "normal_1/S20210601_0003.jpg",
-           # "normal_1/S20210601_0004.jpg",
-           # "normal_1/S20210601_0005.jpg",
-           # "normal_1/S20210601_0006.jpg",
-           # "normal_1/S20210601_0007.jpg",
-           # "normal_1/S20210601_0008.jpg",
-           # "normal_1/S20210601_0009.jpg",
-           # "normal_1/S20210601_0010.jpg",
-           # "normal_1/S20210601_0011.jpg",
-           # "normal_1/S20210601_0012.jpg",
-           # "normal_1/S20210601_0013.jpg",
-           # "normal_1/S20210601_0014.jpg",
+            "normal_1/S20210601_0002.jpg",
+            "normal_1/S20210601_0003.jpg",
+            "normal_1/S20210601_0004.jpg",
+            "normal_1/S20210601_0005.jpg",
+            "normal_1/S20210601_0006.jpg",
+            "normal_1/S20210601_0007.jpg",
+            "normal_1/S20210601_0008.jpg",
+            "normal_1/S20210601_0009.jpg",
+            "normal_1/S20210601_0010.jpg",
+            "normal_1/S20210601_0011.jpg",
+            "normal_1/S20210601_0012.jpg",
+            "normal_1/S20210601_0013.jpg",
+            "normal_1/S20210601_0014.jpg",
             "normal_1/S20210601_0015.jpg"]
 
     print("select two points for scaling")
-    ps = receive_click_locations(scale)
+    ps = receive_click_locations(scale, "scale")
     sc = abs(Line(Point(*ps[0]), Point(*ps[1])).vector())
 
     with open("slotwidths.csv", 'w') as f:
@@ -65,11 +67,11 @@ if __name__ == '__main__':
     widths = []
     for img in imgs:
         print("select points on top of slot {}".format(1))
-        slot_top = Points(receive_click_locations(img))
+        slot_top = Points(receive_click_locations(img, "top"))
 
         print(slot_top)
         print("select points on bottom of slot {}".format(1))
-        slot_btm = Points(receive_click_locations(img))
+        slot_btm = Points(receive_click_locations(img, "btm"))
         print(slot_btm)
         top_area = np.trapz(slot_top.y, slot_top.x) / (max(slot_top.x)  - min(slot_top.x))
         btm_area = np.trapz(slot_btm.y, slot_btm.x) / (max(slot_btm.x)  - min(slot_btm.x))
